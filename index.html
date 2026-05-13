@@ -1,0 +1,1502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Villa Rossini — Luxury Italian Hotel</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Josefin+Sans:wght@200;300;400&display=swap" rel="stylesheet">
+
+<!-- Firebase SDK -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, collection, addDoc, getDocs, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  // ── PASTE YOUR FIREBASE CONFIG HERE ──────────────────────────────────────────
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT.firebaseapp.com",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_PROJECT.appspot.com",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId: "YOUR_APP_ID"
+  };
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  const app = initializeApp(firebaseConfig);
+  const db  = getFirestore(app);
+
+  // Expose globally so inline scripts can reach them
+  window._db          = db;
+  window._collection  = collection;
+  window._addDoc      = addDoc;
+  window._getDocs     = getDocs;
+  window._serverTimestamp = serverTimestamp;
+  window._query       = query;
+  window._orderBy     = orderBy;
+  window._firebaseReady = true;
+  document.dispatchEvent(new Event("firebase-ready"));
+</script>
+
+<style>
+/* ═══════════════════════════════════════════════════════════
+   DESIGN TOKENS
+═══════════════════════════════════════════════════════════ */
+:root {
+  --cream:       #F5F0E8;
+  --cream-dark:  #EDE5D4;
+  --gold:        #C9A84C;
+  --gold-light:  #E2C97A;
+  --gold-pale:   #F0DFA0;
+  --espresso:    #1A1209;
+  --bark:        #3D2B1F;
+  --terracotta:  #B85C3A;
+  --sage:        #7A9E7E;
+  --white:       #FDFAF4;
+  --glass:       rgba(253,250,244,0.06);
+  --glass-border:rgba(201,168,76,0.25);
+  --shadow-gold: 0 8px 40px rgba(201,168,76,0.18);
+  --ff-display:  'Cormorant Garamond', serif;
+  --ff-body:     'Josefin Sans', sans-serif;
+  --ease-luxury: cubic-bezier(0.25,0.46,0.45,0.94);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RESET & BASE
+═══════════════════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; font-size: 16px; }
+body {
+  background: var(--espresso);
+  color: var(--cream);
+  font-family: var(--ff-body);
+  font-weight: 300;
+  letter-spacing: 0.04em;
+  overflow-x: hidden;
+}
+img { display: block; max-width: 100%; }
+a  { color: inherit; text-decoration: none; }
+ul { list-style: none; }
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--espresso); }
+::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 3px; }
+
+/* ═══════════════════════════════════════════════════════════
+   NAV
+═══════════════════════════════════════════════════════════ */
+.nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 900;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1.4rem 4rem;
+  transition: background 0.5s var(--ease-luxury), padding 0.4s;
+}
+.nav.scrolled {
+  background: rgba(26,18,9,0.95);
+  backdrop-filter: blur(12px);
+  padding: 0.9rem 4rem;
+  border-bottom: 1px solid var(--glass-border);
+}
+.nav-logo {
+  font-family: var(--ff-display);
+  font-size: 1.6rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: var(--gold);
+}
+.nav-logo span { display: block; font-size: 0.55rem; font-family: var(--ff-body); letter-spacing: 0.35em; color: var(--cream); font-weight: 200; margin-top: -2px; }
+.nav-links { display: flex; gap: 2.5rem; }
+.nav-links a {
+  font-size: 0.7rem; letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--cream); opacity: 0.78;
+  position: relative; padding-bottom: 3px;
+  transition: opacity 0.3s;
+}
+.nav-links a::after {
+  content: ''; position: absolute; bottom: 0; left: 0;
+  width: 0; height: 1px; background: var(--gold);
+  transition: width 0.35s var(--ease-luxury);
+}
+.nav-links a:hover { opacity: 1; }
+.nav-links a:hover::after { width: 100%; }
+.nav-book-btn {
+  font-size: 0.65rem; letter-spacing: 0.25em; text-transform: uppercase;
+  padding: 0.65rem 1.6rem;
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  transition: background 0.3s, color 0.3s;
+}
+.nav-book-btn:hover { background: var(--gold); color: var(--espresso); }
+
+/* Hamburger */
+.hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 4px; }
+.hamburger span { display: block; width: 24px; height: 1px; background: var(--cream); transition: all 0.3s; }
+.hamburger.open span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+.hamburger.open span:nth-child(2) { opacity: 0; }
+.hamburger.open span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+
+.mobile-menu {
+  display: none; position: fixed; inset: 0; z-index: 899;
+  background: rgba(26,18,9,0.97); backdrop-filter: blur(8px);
+  flex-direction: column; align-items: center; justify-content: center; gap: 2.5rem;
+}
+.mobile-menu.open { display: flex; }
+.mobile-menu a { font-family: var(--ff-display); font-size: 2rem; font-weight: 300; letter-spacing: 0.08em; }
+
+/* ═══════════════════════════════════════════════════════════
+   HERO
+═══════════════════════════════════════════════════════════ */
+.hero {
+  position: relative;
+  height: 100vh; min-height: 680px;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+}
+.hero-bg {
+  position: absolute; inset: 0;
+  background:
+    linear-gradient(160deg, rgba(26,18,9,0.72) 0%, rgba(26,18,9,0.35) 50%, rgba(26,18,9,0.75) 100%),
+    url('https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1800&q=80') center/cover no-repeat;
+  transform: scale(1.05);
+  animation: heroZoom 18s ease-in-out infinite alternate;
+}
+@keyframes heroZoom { to { transform: scale(1.0); } }
+
+.hero-content {
+  position: relative; z-index: 2;
+  text-align: center; padding: 0 2rem;
+}
+.hero-label {
+  font-size: 0.62rem; letter-spacing: 0.45em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 1.6rem;
+  animation: fadeUp 1.2s var(--ease-luxury) 0.3s both;
+}
+.hero-title {
+  font-family: var(--ff-display);
+  font-size: clamp(3.5rem, 8vw, 7.5rem);
+  font-weight: 300; line-height: 0.92; letter-spacing: 0.02em;
+  margin-bottom: 1.8rem;
+  animation: fadeUp 1.2s var(--ease-luxury) 0.5s both;
+}
+.hero-title em { font-style: italic; color: var(--gold-light); }
+.hero-sub {
+  font-size: 0.72rem; letter-spacing: 0.22em; opacity: 0.75;
+  max-width: 380px; margin: 0 auto 3rem;
+  line-height: 2;
+  animation: fadeUp 1.2s var(--ease-luxury) 0.7s both;
+}
+.hero-ctas {
+  display: flex; gap: 1.2rem; justify-content: center; flex-wrap: wrap;
+  animation: fadeUp 1.2s var(--ease-luxury) 0.9s both;
+}
+.btn-primary {
+  display: inline-block;
+  padding: 1rem 2.8rem;
+  background: var(--gold);
+  color: var(--espresso);
+  font-size: 0.65rem; letter-spacing: 0.28em; text-transform: uppercase;
+  font-weight: 400;
+  transition: background 0.3s, transform 0.3s;
+}
+.btn-primary:hover { background: var(--gold-light); transform: translateY(-2px); }
+.btn-outline {
+  display: inline-block;
+  padding: 1rem 2.8rem;
+  border: 1px solid rgba(245,240,232,0.45);
+  color: var(--cream);
+  font-size: 0.65rem; letter-spacing: 0.28em; text-transform: uppercase;
+  transition: border-color 0.3s, color 0.3s, transform 0.3s;
+}
+.btn-outline:hover { border-color: var(--gold); color: var(--gold); transform: translateY(-2px); }
+
+.hero-scroll {
+  position: absolute; bottom: 2.5rem; left: 50%; transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+  font-size: 0.58rem; letter-spacing: 0.3em; text-transform: uppercase; opacity: 0.55;
+  animation: fadeUp 1s var(--ease-luxury) 1.4s both;
+}
+.hero-scroll::after {
+  content: ''; display: block; width: 1px; height: 42px;
+  background: linear-gradient(to bottom, var(--gold), transparent);
+  animation: scrollLine 2s ease-in-out infinite;
+}
+@keyframes scrollLine { 0%,100% { transform: scaleY(1); opacity: 1; } 50% { transform: scaleY(0.5); opacity: 0.4; } }
+
+/* Ornament */
+.gold-line {
+  display: flex; align-items: center; gap: 1.2rem;
+  margin: 0 auto 2.2rem; width: fit-content;
+}
+.gold-line::before, .gold-line::after {
+  content: ''; width: 60px; height: 1px; background: var(--gold); opacity: 0.55;
+}
+.gold-line-diamond { width: 6px; height: 6px; background: var(--gold); transform: rotate(45deg); }
+
+/* ═══════════════════════════════════════════════════════════
+   SECTIONS COMMON
+═══════════════════════════════════════════════════════════ */
+section { padding: 7rem 4rem; }
+.section-label {
+  font-size: 0.6rem; letter-spacing: 0.42em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 1rem; display: block;
+}
+.section-title {
+  font-family: var(--ff-display);
+  font-size: clamp(2.2rem, 4.5vw, 3.8rem);
+  font-weight: 300; line-height: 1.08;
+  margin-bottom: 1.4rem;
+}
+.section-title em { font-style: italic; color: var(--gold-light); }
+.section-body {
+  font-size: 0.78rem; line-height: 2.1; opacity: 0.7;
+  max-width: 540px;
+}
+
+/* Fade-in on scroll */
+.fade-in { opacity: 0; transform: translateY(30px); transition: opacity 0.9s var(--ease-luxury), transform 0.9s var(--ease-luxury); }
+.fade-in.visible { opacity: 1; transform: none; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(28px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ABOUT STRIP
+═══════════════════════════════════════════════════════════ */
+.about-strip {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 0;
+  padding: 0;
+}
+.about-image {
+  position: relative; overflow: hidden; height: 620px;
+}
+.about-image img {
+  width: 100%; height: 100%; object-fit: cover;
+  transition: transform 1.2s var(--ease-luxury);
+}
+.about-image:hover img { transform: scale(1.05); }
+.about-image-caption {
+  position: absolute; bottom: 2rem; left: 2rem;
+  font-size: 0.6rem; letter-spacing: 0.3em; text-transform: uppercase;
+  background: rgba(26,18,9,0.7); padding: 0.5rem 1rem;
+  border-left: 2px solid var(--gold);
+}
+.about-text {
+  background: var(--bark);
+  padding: 5rem 5rem;
+  display: flex; flex-direction: column; justify-content: center;
+}
+.about-stats {
+  display: grid; grid-template-columns: repeat(3,1fr); gap: 1.5rem;
+  margin-top: 3rem; padding-top: 3rem;
+  border-top: 1px solid rgba(201,168,76,0.2);
+}
+.stat-num {
+  font-family: var(--ff-display); font-size: 3rem; font-weight: 300;
+  color: var(--gold); line-height: 1;
+}
+.stat-label { font-size: 0.6rem; letter-spacing: 0.25em; text-transform: uppercase; opacity: 0.6; margin-top: 0.4rem; }
+
+/* ═══════════════════════════════════════════════════════════
+   ROOMS
+═══════════════════════════════════════════════════════════ */
+.rooms-section { background: var(--espresso); }
+.rooms-header { text-align: center; margin-bottom: 4rem; }
+.rooms-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px;
+  max-width: 1400px; margin: 0 auto;
+}
+.room-card {
+  position: relative; overflow: hidden; cursor: pointer;
+  aspect-ratio: 3/4;
+}
+.room-card img {
+  width: 100%; height: 100%; object-fit: cover;
+  transition: transform 0.9s var(--ease-luxury), filter 0.6s;
+}
+.room-card:hover img { transform: scale(1.08); filter: brightness(0.75); }
+.room-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(26,18,9,0.92) 0%, transparent 55%);
+  display: flex; flex-direction: column; justify-content: flex-end;
+  padding: 2.2rem;
+  transition: background 0.5s;
+}
+.room-card:hover .room-overlay {
+  background: linear-gradient(to top, rgba(26,18,9,0.97) 0%, rgba(26,18,9,0.3) 70%);
+}
+.room-tag {
+  font-size: 0.58rem; letter-spacing: 0.32em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 0.5rem;
+}
+.room-name {
+  font-family: var(--ff-display); font-size: 1.7rem; font-weight: 300;
+  line-height: 1.15; margin-bottom: 0.7rem;
+}
+.room-price {
+  font-size: 0.7rem; letter-spacing: 0.15em; color: var(--gold-light);
+  margin-bottom: 1.2rem;
+}
+.room-desc {
+  font-size: 0.7rem; line-height: 1.8; opacity: 0.72;
+  max-height: 0; overflow: hidden;
+  transition: max-height 0.6s var(--ease-luxury), opacity 0.6s;
+}
+.room-card:hover .room-desc { max-height: 100px; }
+.room-btn {
+  display: inline-block; margin-top: 1.2rem;
+  padding: 0.6rem 1.5rem; border: 1px solid var(--gold);
+  color: var(--gold); font-size: 0.6rem; letter-spacing: 0.25em; text-transform: uppercase;
+  opacity: 0; transform: translateY(8px);
+  transition: opacity 0.4s, transform 0.4s, background 0.3s;
+}
+.room-card:hover .room-btn { opacity: 1; transform: none; }
+.room-btn:hover { background: var(--gold); color: var(--espresso); }
+
+/* ═══════════════════════════════════════════════════════════
+   GALLERY SLIDER
+═══════════════════════════════════════════════════════════ */
+.gallery-section { padding: 7rem 0; background: var(--bark); overflow: hidden; }
+.gallery-header { padding: 0 4rem; text-align: center; margin-bottom: 3.5rem; }
+.slider-wrap { position: relative; overflow: hidden; }
+.slider-track {
+  display: flex;
+  transition: transform 0.8s var(--ease-luxury);
+}
+.slide {
+  flex: 0 0 calc(33.333% - 12px);
+  margin-right: 16px;
+  position: relative; overflow: hidden;
+  border-radius: 0;
+  aspect-ratio: 4/3;
+}
+.slide img {
+  width: 100%; height: 100%; object-fit: cover;
+  transition: transform 0.7s var(--ease-luxury);
+}
+.slide:hover img { transform: scale(1.05); }
+.slide-caption {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  padding: 1.2rem 1.5rem;
+  background: linear-gradient(transparent, rgba(26,18,9,0.85));
+  font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase;
+  opacity: 0; transition: opacity 0.4s;
+}
+.slide:hover .slide-caption { opacity: 1; }
+.slider-controls {
+  display: flex; align-items: center; justify-content: center; gap: 1.5rem;
+  padding: 2.5rem 0 0;
+}
+.slider-btn {
+  width: 48px; height: 48px;
+  border: 1px solid var(--glass-border); background: transparent;
+  color: var(--cream); cursor: pointer; font-size: 1.1rem;
+  display: flex; align-items: center; justify-content: center;
+  transition: border-color 0.3s, background 0.3s;
+}
+.slider-btn:hover { border-color: var(--gold); background: rgba(201,168,76,0.12); }
+.slider-dots { display: flex; gap: 6px; }
+.slider-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: rgba(245,240,232,0.3); cursor: pointer;
+  transition: background 0.3s, transform 0.3s;
+}
+.slider-dot.active { background: var(--gold); transform: scale(1.35); }
+
+/* ═══════════════════════════════════════════════════════════
+   AMENITIES
+═══════════════════════════════════════════════════════════ */
+.amenities-section { background: var(--espresso); }
+.amenities-header { text-align: center; margin-bottom: 4rem; }
+.amenities-grid {
+  display: grid; grid-template-columns: repeat(4,1fr); gap: 1.5rem;
+  max-width: 1100px; margin: 0 auto;
+}
+.amenity-card {
+  padding: 2.5rem 2rem;
+  border: 1px solid var(--glass-border);
+  text-align: center;
+  transition: border-color 0.4s, background 0.4s, transform 0.4s;
+}
+.amenity-image {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  margin-bottom: 1.2rem;
+  border: 1px solid var(--glass-border);
+}
+.amenity-card:hover {
+  border-color: var(--gold);
+  background: rgba(201,168,76,0.06);
+  transform: translateY(-6px);
+}
+.amenity-icon { font-size: 2rem; margin-bottom: 1.2rem; }
+.amenity-name {
+  font-family: var(--ff-display); font-size: 1.15rem; font-weight: 300;
+  margin-bottom: 0.6rem; letter-spacing: 0.04em;
+}
+.amenity-desc { font-size: 0.68rem; opacity: 0.6; line-height: 1.8; letter-spacing: 0.06em; }
+
+/* ═══════════════════════════════════════════════════════════
+   TESTIMONIALS
+═══════════════════════════════════════════════════════════ */
+.testimonials-section {
+  background: linear-gradient(135deg, var(--bark) 0%, var(--espresso) 100%);
+  text-align: center;
+}
+.testimonials-header { margin-bottom: 3.5rem; }
+.testimonial-slider { position: relative; max-width: 760px; margin: 0 auto; min-height: 220px; }
+.testimonial {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center;
+  opacity: 0; transition: opacity 0.7s var(--ease-luxury);
+  pointer-events: none;
+}
+.testimonial.active { opacity: 1; pointer-events: auto; }
+.testimonial-stars { color: var(--gold); letter-spacing: 0.2em; font-size: 0.9rem; margin-bottom: 1.8rem; }
+.testimonial-text {
+  font-family: var(--ff-display); font-size: 1.45rem; font-style: italic;
+  font-weight: 300; line-height: 1.55; color: var(--cream); margin-bottom: 1.8rem;
+}
+.testimonial-author { font-size: 0.62rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold); }
+.testimonial-nav {
+  display: flex; justify-content: center; gap: 8px; margin-top: 14rem;
+}
+.t-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: rgba(245,240,232,0.25); cursor: pointer;
+  transition: background 0.3s;
+}
+.t-dot.active { background: var(--gold); }
+
+/* ═══════════════════════════════════════════════════════════
+   BOOKING FORM
+═══════════════════════════════════════════════════════════ */
+.booking-section {
+  background: var(--cream-dark);
+  color: var(--espresso);
+}
+.booking-inner {
+  display: grid; grid-template-columns: 1fr 1.4fr; gap: 0;
+  max-width: 1200px; margin: 0 auto;
+  box-shadow: var(--shadow-gold);
+}
+.booking-info {
+  background: var(--espresso);
+  color: var(--cream);
+  padding: 4rem;
+}
+.booking-info .section-title { color: var(--cream); }
+.booking-info p { font-size: 0.72rem; line-height: 2; opacity: 0.7; margin: 1.2rem 0 2.5rem; }
+.booking-contact-item {
+  display: flex; align-items: center; gap: 1rem;
+  margin-bottom: 1rem; font-size: 0.7rem;
+}
+.booking-contact-item .icon { width: 32px; height: 32px; border: 1px solid var(--glass-border); display: flex; align-items: center; justify-content: center; font-size: 0.85rem; flex-shrink: 0; }
+
+.booking-form-wrap { background: var(--white); padding: 4rem; }
+.booking-form-wrap .section-label { color: var(--bark); }
+.booking-form-wrap .section-title { color: var(--espresso); }
+
+form { margin-top: 2rem; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; margin-bottom: 1.2rem; }
+.form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+.form-group.full { grid-column: 1 / -1; }
+label {
+  font-size: 0.58rem; letter-spacing: 0.28em; text-transform: uppercase;
+  color: var(--bark); opacity: 0.7;
+}
+input, select, textarea {
+  padding: 0.85rem 1rem;
+  border: 1px solid rgba(61,43,31,0.2);
+  background: transparent;
+  font-family: var(--ff-body);
+  font-size: 0.78rem; letter-spacing: 0.05em;
+  color: var(--espresso);
+  outline: none;
+  transition: border-color 0.3s;
+  appearance: none;
+}
+input:focus, select:focus, textarea:focus { border-color: var(--gold); }
+textarea { resize: vertical; min-height: 100px; }
+select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%233D2B1F'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 1rem center; padding-right: 2.5rem; }
+.btn-submit {
+  width: 100%; padding: 1.1rem;
+  background: var(--espresso); color: var(--gold);
+  border: 1px solid var(--espresso);
+  font-family: var(--ff-body); font-size: 0.65rem; letter-spacing: 0.3em; text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.3s, color 0.3s;
+  margin-top: 0.5rem;
+}
+.btn-submit:hover { background: var(--gold); color: var(--espresso); border-color: var(--gold); }
+.form-msg {
+  display: none; margin-top: 1rem; padding: 0.9rem 1.2rem;
+  font-size: 0.72rem; letter-spacing: 0.08em; text-align: center;
+}
+.form-msg.success { background: rgba(122,158,126,0.15); border: 1px solid var(--sage); color: var(--sage); }
+.form-msg.error   { background: rgba(184,92,58,0.1); border: 1px solid var(--terracotta); color: var(--terracotta); }
+.form-msg.show { display: block; }
+
+/* ═══════════════════════════════════════════════════════════
+   ADMIN DASHBOARD
+═══════════════════════════════════════════════════════════ */
+.admin-section {
+  background: var(--espresso);
+  border-top: 1px solid var(--glass-border);
+}
+.admin-header { text-align: center; margin-bottom: 2.5rem; }
+.admin-toggle-btn {
+  display: block; margin: 0 auto 2.5rem;
+  padding: 0.8rem 2.5rem;
+  border: 1px solid var(--glass-border); background: transparent;
+  color: var(--cream); font-family: var(--ff-body);
+  font-size: 0.65rem; letter-spacing: 0.25em; text-transform: uppercase;
+  cursor: pointer; transition: border-color 0.3s, color 0.3s;
+}
+.admin-toggle-btn:hover { border-color: var(--gold); color: var(--gold); }
+.admin-panel { display: none; }
+.admin-panel.open { display: block; }
+.admin-login {
+  max-width: 380px; margin: 0 auto; padding: 2.5rem;
+  border: 1px solid var(--glass-border);
+}
+.admin-login h3 { font-family: var(--ff-display); font-size: 1.5rem; font-weight: 300; margin-bottom: 1.5rem; text-align: center; }
+.admin-login input {
+  width: 100%; margin-bottom: 1rem;
+  background: rgba(255,255,255,0.04); color: var(--cream);
+  border-color: var(--glass-border);
+}
+.admin-login input:focus { border-color: var(--gold); }
+.admin-login .btn-submit {
+  background: var(--gold); color: var(--espresso); border-color: var(--gold);
+}
+.admin-login .btn-submit:hover { background: var(--gold-light); }
+.admin-login .login-error { color: var(--terracotta); font-size: 0.68rem; margin-top: 0.5rem; text-align: center; letter-spacing: 0.05em; }
+
+.bookings-table-wrap { overflow-x: auto; }
+.bookings-count {
+  font-size: 0.7rem; letter-spacing: 0.15em; opacity: 0.6;
+  margin-bottom: 1.2rem;
+}
+.bookings-table {
+  width: 100%; border-collapse: collapse;
+  font-size: 0.72rem;
+}
+.bookings-table th {
+  text-align: left; padding: 0.8rem 1.2rem;
+  font-size: 0.58rem; letter-spacing: 0.3em; text-transform: uppercase;
+  color: var(--gold); border-bottom: 1px solid var(--glass-border);
+}
+.bookings-table td {
+  padding: 1rem 1.2rem;
+  border-bottom: 1px solid rgba(201,168,76,0.08);
+  opacity: 0.85;
+}
+.bookings-table tr:hover td { background: rgba(201,168,76,0.04); opacity: 1; }
+.status-badge {
+  display: inline-block; padding: 0.25rem 0.75rem;
+  font-size: 0.55rem; letter-spacing: 0.2em; text-transform: uppercase;
+  border-radius: 2px;
+}
+.status-new { background: rgba(122,158,126,0.2); color: var(--sage); }
+.admin-refresh-btn {
+  margin-top: 1.5rem; padding: 0.65rem 1.8rem;
+  border: 1px solid var(--glass-border); background: transparent;
+  color: var(--cream); font-family: var(--ff-body);
+  font-size: 0.62rem; letter-spacing: 0.22em; text-transform: uppercase;
+  cursor: pointer; transition: border-color 0.3s, color 0.3s;
+}
+.admin-refresh-btn:hover { border-color: var(--gold); color: var(--gold); }
+.admin-no-bookings { text-align: center; padding: 3rem; opacity: 0.45; font-size: 0.8rem; letter-spacing: 0.12em; }
+
+/* ═══════════════════════════════════════════════════════════
+   FOOTER
+═══════════════════════════════════════════════════════════ */
+footer {
+  background: var(--espresso);
+  border-top: 1px solid var(--glass-border);
+  padding: 5rem 4rem 2.5rem;
+}
+.footer-grid {
+  display: grid; grid-template-columns: 1.8fr 1fr 1fr 1fr; gap: 3rem;
+  margin-bottom: 4rem;
+}
+.footer-brand p {
+  font-size: 0.7rem; line-height: 2; opacity: 0.55; margin: 1.2rem 0 2rem; max-width: 280px;
+}
+.footer-logo { font-family: var(--ff-display); font-size: 1.8rem; font-weight: 600; color: var(--gold); letter-spacing: 0.1em; }
+.footer-logo span { display: block; font-size: 0.52rem; font-family: var(--ff-body); letter-spacing: 0.38em; color: var(--cream); margin-top: -2px; font-weight: 200; opacity: 0.65; }
+.social-links { display: flex; gap: 0.8rem; }
+.social-link {
+  width: 36px; height: 36px; border: 1px solid var(--glass-border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.8rem; opacity: 0.65;
+  transition: border-color 0.3s, opacity 0.3s;
+}
+.social-link:hover { border-color: var(--gold); opacity: 1; }
+.footer-col h4 {
+  font-size: 0.6rem; letter-spacing: 0.35em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 1.5rem;
+}
+.footer-col ul { display: flex; flex-direction: column; gap: 0.75rem; }
+.footer-col ul li a { font-size: 0.7rem; opacity: 0.55; letter-spacing: 0.08em; transition: opacity 0.3s; }
+.footer-col ul li a:hover { opacity: 1; }
+.footer-bottom {
+  border-top: 1px solid rgba(201,168,76,0.12);
+  padding-top: 2rem;
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 0.6rem; letter-spacing: 0.15em; opacity: 0.4;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   WHATSAPP BUTTON
+═══════════════════════════════════════════════════════════ */
+.whatsapp-btn {
+  position: fixed; bottom: 2.2rem; right: 2.2rem; z-index: 800;
+  width: 58px; height: 58px;
+  background: #25D366;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 6px 24px rgba(37,211,102,0.45);
+  animation: waPulse 3s ease-in-out infinite;
+  cursor: pointer;
+  transition: transform 0.3s;
+}
+.whatsapp-btn:hover { transform: scale(1.12); }
+.whatsapp-btn svg { width: 28px; height: 28px; fill: #fff; }
+@keyframes waPulse {
+  0%,100% { box-shadow: 0 6px 24px rgba(37,211,102,0.45); }
+  50%      { box-shadow: 0 6px 36px rgba(37,211,102,0.7), 0 0 0 10px rgba(37,211,102,0.1); }
+}
+.whatsapp-tooltip {
+  position: absolute; right: 72px; top: 50%; transform: translateY(-50%);
+  background: var(--espresso); color: var(--cream);
+  padding: 0.5rem 1rem; white-space: nowrap;
+  font-size: 0.65rem; letter-spacing: 0.12em;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.3s;
+  border: 1px solid var(--glass-border);
+}
+.whatsapp-btn:hover .whatsapp-tooltip { opacity: 1; }
+
+/* ═══════════════════════════════════════════════════════════
+   DECORATIVE DIVIDERS
+═══════════════════════════════════════════════════════════ */
+.divider {
+  text-align: center; padding: 1.5rem 0;
+  font-size: 0.7rem; letter-spacing: 0.5em; color: var(--gold); opacity: 0.4;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════════════════════ */
+@media (max-width: 1024px) {
+  .rooms-grid { grid-template-columns: 1fr 1fr; }
+  .amenities-grid { grid-template-columns: repeat(2,1fr); }
+  .footer-grid { grid-template-columns: 1fr 1fr; gap: 2.5rem; }
+  .about-stats { grid-template-columns: repeat(2,1fr); }
+}
+@media (max-width: 768px) {
+  section { padding: 5rem 1.5rem; }
+  .nav { padding: 1.2rem 1.5rem; }
+  .nav.scrolled { padding: 0.85rem 1.5rem; }
+  .nav-links, .nav-book-btn { display: none; }
+  .hamburger { display: flex; }
+  .about-strip { grid-template-columns: 1fr; }
+  .about-image { height: 340px; }
+  .about-text { padding: 3rem 2rem; }
+  .rooms-grid { grid-template-columns: 1fr; }
+  .slide { flex: 0 0 85%; }
+  .booking-inner { grid-template-columns: 1fr; }
+  .booking-info { padding: 3rem 2rem; }
+  .booking-form-wrap { padding: 3rem 2rem; }
+  .form-row { grid-template-columns: 1fr; }
+  .amenities-grid { grid-template-columns: repeat(2,1fr); }
+  .footer-grid { grid-template-columns: 1fr; }
+  .footer-bottom { flex-direction: column; gap: 0.8rem; text-align: center; }
+}
+@media (max-width: 480px) {
+  .hero-title { font-size: 3rem; }
+  .amenities-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════ NAV ══════════════════ -->
+<nav class="nav" id="mainNav">
+  <div class="nav-logo">Villa Rossini<span>Tuscany · Est. 1892</span></div>
+  <ul class="nav-links">
+    <li><a href="#rooms">Rooms</a></li>
+    <li><a href="#gallery">Gallery</a></li>
+    <li><a href="#amenities">Amenities</a></li>
+    <li><a href="#booking">Reservations</a></li>
+  </ul>
+  <a href="#booking" class="nav-book-btn">Book Now</a>
+  <div class="hamburger" id="hamburger">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- Mobile Menu -->
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#rooms"      onclick="closeMobile()">Rooms</a>
+  <a href="#gallery"    onclick="closeMobile()">Gallery</a>
+  <a href="#amenities"  onclick="closeMobile()">Amenities</a>
+  <a href="#booking"    onclick="closeMobile()">Reservations</a>
+  <a href="#booking"    onclick="closeMobile()" style="color:var(--gold)">Book Now</a>
+</div>
+
+<!-- ══════════════════ HERO ══════════════════ -->
+<section class="hero" id="home">
+  <div class="hero-bg"></div>
+  <div class="hero-content">
+    <p class="hero-label">Tuscany · Since 1892</p>
+    <h1 class="hero-title">Villa<br><em>Rossini</em></h1>
+    <div class="gold-line"><div class="gold-line-diamond"></div></div>
+    <p class="hero-sub">Where centuries of Italian heritage meet timeless luxury amid the rolling Tuscan hills</p>
+    <div class="hero-ctas">
+      <a href="#booking" class="btn-primary">Reserve Your Stay</a>
+      <a href="#rooms"   class="btn-outline">Explore Rooms</a>
+    </div>
+  </div>
+  <div class="hero-scroll">Scroll</div>
+</section>
+
+<!-- ══════════════════ ABOUT STRIP ══════════════════ -->
+<div class="about-strip">
+  <div class="about-image fade-in">
+    <img src="images/download (10).jpeg" alt="Hotel exterior">
+    <div class="about-image-caption">Exterior · Villa Rossini</div>
+  </div>
+  <div class="about-text fade-in">
+    <span class="section-label">Our Story</span>
+    <h2 class="section-title">A Legacy of<br><em>Italian Grandeur</em></h2>
+    <p class="section-body">
+      Born in 1892 from the vision of Count Aldo Rossini, our villa has welcomed royalty, poets, and discerning travellers for over a century. Perched above the Val d'Orcia, every suite, garden, and candlelit table tells a story of passion, craftsmanship, and the deep warmth of Tuscan hospitality.
+    </p>
+    <div class="about-stats">
+      <div>
+        <div class="stat-num" data-target="132">0</div>
+        <div class="stat-label">Years of Heritage</div>
+      </div>
+      <div>
+        <div class="stat-num" data-target="48">0</div>
+        <div class="stat-label">Luxury Suites</div>
+      </div>
+      <div>
+        <div class="stat-num" data-target="5">0</div>
+        <div class="stat-label">Star Rating</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ ROOMS ══════════════════ -->
+<section class="rooms-section" id="rooms">
+  <div class="rooms-header fade-in">
+    <span class="section-label">Accommodations</span>
+    <h2 class="section-title">Our <em>Suites &amp; Rooms</em></h2>
+  </div>
+  <div class="rooms-grid fade-in">
+
+    <div class="room-card">
+      <img src="images/Transform Your Bedroom into a Refined Retreat with Timeless Modern Design.jpeg" alt="Deluxe Room" loading="lazy">
+      <div class="room-overlay">
+        <div class="room-tag">Deluxe</div>
+        <div class="room-name">Garden Room</div>
+        <div class="room-price">From €320 / night</div>
+        <div class="room-desc">Warm stone walls and hand-painted frescoes overlook our private rose garden. King bed, marble en-suite, organic bath amenities.</div>
+        <a href="#booking" class="room-btn">Reserve</a>
+      </div>
+    </div>
+
+    <div class="room-card">
+      <img src="images/download (2).jpeg" alt="Junior Suite" loading="lazy">
+      <div class="room-overlay">
+        <div class="room-tag">Junior Suite</div>
+        <div class="room-name">Vineyard Suite</div>
+        <div class="room-price">From €520 / night</div>
+        <div class="room-desc">Panoramic vineyard views from your private loggia. Freestanding copper bathtub, bespoke Florentine furnishings, butler service.</div>
+        <a href="#booking" class="room-btn">Reserve</a>
+      </div>
+    </div>
+
+    <div class="room-card">
+      <img src="images/Chambre bleu nuit _ la couleur idéale et tendance - DTI.jpeg" alt="Grand Suite" loading="lazy">
+      <div class="room-overlay">
+        <div class="room-tag">Grand Suite</div>
+        <div class="room-name">Rossini Suite</div>
+        <div class="room-price">From €980 / night</div>
+        <div class="room-desc">The Count's original chambers — 18th-century frescoes, a private heated pool, dual living rooms and your own personal sommelier.</div>
+        <a href="#booking" class="room-btn">Reserve</a>
+      </div>
+    </div>
+
+    <div class="room-card">
+      <img src="images/download (14).jpeg" alt="Superior Room" loading="lazy">
+      <div class="room-overlay">
+        <div class="room-tag">Superior</div>
+        <div class="room-name">Cypress Room</div>
+        <div class="room-price">From €420 / night</div>
+        <div class="room-desc">Named for the ancient cypress avenue outside, featuring a private terrace, hand-laid terracotta floors and a rainfall walk-in shower.</div>
+        <a href="#booking" class="room-btn">Reserve</a>
+      </div>
+    </div>
+
+    <div class="room-card">
+      <img src="images/download (3).jpeg" alt="Tower Suite" loading="lazy">
+      <div class="room-overlay">
+        <div class="room-tag">Tower Suite</div>
+        <div class="room-name">Torre Suite</div>
+        <div class="room-price">From €1,200 / night</div>
+        <div class="room-desc">360° views from the 14th-century tower. Two floors of splendour with a private rooftop observatory for stargazing over Tuscany.</div>
+        <a href="#booking" class="room-btn">Reserve</a>
+      </div>
+    </div>
+
+    <div class="room-card">
+      <img src="images/download (15).jpeg" alt="Cottage" loading="lazy">
+      <div class="room-overlay">
+        <div class="room-tag">Private Villa</div>
+        <div class="room-name">Il Casale</div>
+        <div class="room-price">From €2,400 / night</div>
+        <div class="room-desc">A detached stone cottage with three bedrooms, a private chef's kitchen, olive grove and infinity pool — total seclusion on 4 acres.</div>
+        <a href="#booking" class="room-btn">Reserve</a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════════════════ GALLERY ══════════════════ -->
+<section class="gallery-section" id="gallery">
+  <div class="gallery-header fade-in">
+    <span class="section-label">Visual Journey</span>
+    <h2 class="section-title">Moments at <em>Villa Rossini</em></h2>
+  </div>
+  <div class="slider-wrap">
+    <div class="slider-track" id="sliderTrack">
+      <div class="slide">
+        <img src="images/Dream Backyard with Infinity Pool & Fire Pit (1).jpeg" alt="Pool" loading="lazy">
+        <div class="slide-caption">Infinity Pool · Sunset</div>
+      </div>
+      <div class="slide">
+        <img src="images/download (10).jpeg" alt="Restaurant" loading="lazy">
+        <div class="slide-caption">Osteria Rossini · Fine Dining</div>
+      </div>
+      <div class="slide">
+        <img src="images/Chambre bleu nuit _ la couleur idéale et tendance - DTI.jpeg" alt="Spa" loading="lazy">
+        <div class="slide-caption">La Terme · Luxury Spa</div>
+      </div>
+      <div class="slide">
+        <img src="images/download (14).jpeg" alt="Wine Cellar" loading="lazy">
+        <div class="slide-caption">Cantina · Wine Cellar</div>
+      </div>
+      <div class="slide">
+        <img src="images/Transform Your Bedroom into a Refined Retreat with Timeless Modern Design.jpeg" alt="Garden" loading="lazy">
+        <div class="slide-caption">Giardino · Walled Gardens</div>
+      </div>
+      <div class="slide">
+        <img src="images/download (3).jpeg" alt="Library" loading="lazy">
+        <div class="slide-caption">Biblioteca · Private Library</div>
+      </div>
+      <div class="slide">
+        <img src="images/Pin by The Count Of Monte Cristo on Equestrian _ Dressage _ Show Jumping _ Polo _ Horses, Horse ride.jpeg" alt="Breakfast" loading="lazy">
+        <div class="slide-caption">Colazione · Morning Terrace</div>
+      </div>
+    </div>
+  </div>
+  <div class="slider-controls">
+    <button class="slider-btn" id="sliderPrev">&#8592;</button>
+    <div class="slider-dots" id="sliderDots"></div>
+    <button class="slider-btn" id="sliderNext">&#8594;</button>
+  </div>
+</section>
+
+<!-- ══════════════════ AMENITIES ══════════════════ -->
+<section class="amenities-section" id="amenities">
+  <div class="amenities-header fade-in">
+    <span class="section-label">Experiences</span>
+    <h2 class="section-title">Life at <em>the Villa</em></h2>
+  </div>
+  <div class="amenities-grid fade-in">
+    <div class="amenity-card">
+      <img class="amenity-image" src="images/download (14).jpeg" alt="Wine Cellar" loading="lazy">
+      <div class="amenity-name">Wine Cellar</div>
+      <div class="amenity-desc">Curated tastings in our 15th-century cellar with 4,000 bottles from the finest Italian estates.</div>
+    </div>
+    <div class="amenity-card">
+      <img class="amenity-image" src="images/Chambre bleu nuit _ la couleur idéale et tendance - DTI.jpeg" alt="Organic Spa" loading="lazy">
+      <div class="amenity-name">Organic Spa</div>
+      <div class="amenity-desc">Traditional thermae rituals using locally sourced olive oil, volcanic clay and wildflower extracts.</div>
+    </div>
+    <div class="amenity-card">
+      <img class="amenity-image" src="images/download (10).jpeg" alt="Fine Dining" loading="lazy">
+      <div class="amenity-name">Fine Dining</div>
+      <div class="amenity-desc">One Michelin-star Osteria Rossini — seasonal Tuscan cuisine by Executive Chef Marco Ferri.</div>
+    </div>
+    <div class="amenity-card">
+      <img class="amenity-image" src="images/download (3).jpeg" alt="Cycling Tours" loading="lazy">
+      <div class="amenity-name">Cycling Tours</div>
+      <div class="amenity-desc">Guided e-bike journeys through cypress-lined lanes and hilltop villages with picnic baskets.</div>
+    </div>
+    <div class="amenity-card">
+      <img class="amenity-image" src="images/download (15).jpeg" alt="Art Workshops" loading="lazy">
+      <div class="amenity-name">Art Workshops</div>
+      <div class="amenity-desc">Fresco painting and ceramics in our garden atelier with Florentine master artisans.</div>
+    </div>
+    <div class="amenity-card">
+      <img class="amenity-image" src="images/Dream Backyard with Infinity Pool & Fire Pit (1).jpeg" alt="Infinity Pool" loading="lazy">
+      <div class="amenity-name">Infinity Pool</div>
+      <div class="amenity-desc">A heated 25m infinity pool overlooking the Val d'Orcia, open year-round with poolside service.</div>
+    </div>
+    <div class="amenity-card">
+      <img class="amenity-image" src="images/Pin by The Count Of Monte Cristo on Equestrian _ Dressage _ Show Jumping _ Polo _ Horses, Horse ride.jpeg" alt="Horse Riding" loading="lazy">
+      <div class="amenity-name">Horse Riding</div>
+      <div class="amenity-desc">Morning rides through our private olive groves and truffle forests with expert equestrian guides.</div>
+    </div>
+    <div class="amenity-card">
+      <img class="amenity-image" src="images/download (10).jpeg" alt="Helicopter Transfer" loading="lazy">
+      <div class="amenity-name">Helicopter Transfer</div>
+      <div class="amenity-desc">Private helicopter arrivals from Florence, Pisa and Rome airports to our landscaped helipad.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════ TESTIMONIALS ══════════════════ -->
+<section class="testimonials-section">
+  <div class="testimonials-header fade-in">
+    <span class="section-label">Guest Stories</span>
+    <h2 class="section-title">Words from <em>Our Guests</em></h2>
+  </div>
+  <div class="testimonial-slider fade-in">
+    <div class="testimonial active">
+      <div class="testimonial-stars">★★★★★</div>
+      <div class="testimonial-text">"Villa Rossini is not merely a hotel — it is a state of being. We returned home different people, slower, richer in spirit."</div>
+      <div class="testimonial-author">— Isabelle Fontaine, Paris</div>
+    </div>
+    <div class="testimonial">
+      <div class="testimonial-stars">★★★★★</div>
+      <div class="testimonial-text">"The Rossini Suite is the finest room I have stayed in across forty years of global travel. Utterly, completely perfect."</div>
+      <div class="testimonial-author">— Sir James Whitmore, London</div>
+    </div>
+    <div class="testimonial">
+      <div class="testimonial-stars">★★★★★</div>
+      <div class="testimonial-text">"Our honeymoon here exceeded every dream. The staff remembered our names from the first morning, and never let us want for anything."</div>
+      <div class="testimonial-author">— Camila &amp; Rafael Santos, São Paulo</div>
+    </div>
+    <div class="testimonial">
+      <div class="testimonial-stars">★★★★★</div>
+      <div class="testimonial-text">"Chef Ferri's tasting menu is worth the flight to Italy alone. A transcendent experience in every course."</div>
+      <div class="testimonial-author">— Naomi Watanabe, Tokyo</div>
+    </div>
+    <div class="testimonial-nav" id="testimonialNav"></div>
+  </div>
+</section>
+
+<!-- ══════════════════ BOOKING FORM ══════════════════ -->
+<section class="booking-section" id="booking">
+  <div class="booking-inner">
+    <div class="booking-info fade-in">
+      <span class="section-label">Reservations</span>
+      <h2 class="section-title">Begin Your <em>Journey</em></h2>
+      <p>Our reservations team is available seven days a week to craft your perfect Tuscan escape. Every detail attended to, every wish anticipated.</p>
+      <div class="booking-contact-item">
+        <div class="icon">☎</div>
+        <span>+39 0577 123 456</span>
+      </div>
+      <div class="booking-contact-item">
+        <div class="icon">✉</div>
+        <span>reservations@villarossini.it</span>
+      </div>
+      <div class="booking-contact-item">
+        <div class="icon">📍</div>
+        <span>Via della Vigna 12, Montalcino, Siena 53024</span>
+      </div>
+    </div>
+    <div class="booking-form-wrap fade-in">
+      <span class="section-label">Your Details</span>
+      <h3 class="section-title" style="font-size:1.8rem;">Reserve a Room</h3>
+      <form id="bookingForm" novalidate>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="firstName">First Name</label>
+            <input type="text" id="firstName" placeholder="Giovanni" required>
+          </div>
+          <div class="form-group">
+            <label for="lastName">Last Name</label>
+            <input type="text" id="lastName" placeholder="Conti" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" placeholder="g.conti@email.com" required>
+          </div>
+          <div class="form-group">
+            <label for="phone">Phone Number</label>
+            <input type="tel" id="phone" placeholder="+39 000 000 0000">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="checkIn">Check-In</label>
+            <input type="date" id="checkIn" required>
+          </div>
+          <div class="form-group">
+            <label for="checkOut">Check-Out</label>
+            <input type="date" id="checkOut" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="roomType">Room Type</label>
+            <select id="roomType" required>
+              <option value="">Select a Room</option>
+              <option>Garden Room — €320/night</option>
+              <option>Vineyard Suite — €520/night</option>
+              <option>Rossini Suite — €980/night</option>
+              <option>Cypress Room — €420/night</option>
+              <option>Torre Suite — €1,200/night</option>
+              <option>Il Casale (Private Villa) — €2,400/night</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="guests">Number of Guests</label>
+            <select id="guests">
+              <option>1 Guest</option>
+              <option selected>2 Guests</option>
+              <option>3 Guests</option>
+              <option>4 Guests</option>
+              <option>5+ Guests</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group full">
+            <label for="requests">Special Requests</label>
+            <textarea id="requests" placeholder="Dietary requirements, room preferences, special occasions…"></textarea>
+          </div>
+        </div>
+        <button type="submit" class="btn-submit" id="submitBtn">Book Now</button>
+        <div class="form-msg" id="formMsg"></div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════ ADMIN DASHBOARD ══════════════════ -->
+<section class="admin-section" id="admin">
+  <div class="admin-header fade-in">
+    <span class="section-label">Staff Portal</span>
+    <h2 class="section-title">Admin <em>Dashboard</em></h2>
+  </div>
+  <button class="admin-toggle-btn" id="adminToggleBtn">Access Dashboard</button>
+  <div class="admin-panel" id="adminPanel">
+
+    <!-- Login -->
+    <div class="admin-login" id="adminLogin">
+      <h3>Staff Login</h3>
+      <label for="adminUser">Username</label>
+      <input type="text" id="adminUser" placeholder="admin">
+      <label for="adminPass">Password</label>
+      <input type="password" id="adminPass" placeholder="••••••••">
+      <button class="btn-submit" id="adminLoginBtn" style="margin-top:1rem">Sign In</button>
+      <p class="login-error" id="loginError"></p>
+    </div>
+
+    <!-- Bookings Table (hidden until login) -->
+    <div id="adminBookings" style="display:none">
+      <div class="bookings-count" id="bookingsCount"></div>
+      <div class="bookings-table-wrap">
+        <table class="bookings-table" id="bookingsTable">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Check-In</th>
+              <th>Check-Out</th>
+              <th>Room</th>
+              <th>Guests</th>
+              <th>Requests</th>
+              <th>Status</th>
+              <th>Submitted</th>
+            </tr>
+          </thead>
+          <tbody id="bookingsTbody"></tbody>
+        </table>
+        <div class="admin-no-bookings" id="noBookings" style="display:none">No reservations yet.</div>
+      </div>
+      <button class="admin-refresh-btn" id="adminRefreshBtn">↻ Refresh</button>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════════════════ FOOTER ══════════════════ -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <div class="footer-logo">Villa Rossini<span>Tuscany · Est. 1892</span></div>
+      <p>Where Italian heritage and timeless luxury converge amid the eternal beauty of the Tuscan hills.</p>
+      <div class="social-links">
+        <a href="#" class="social-link" aria-label="Instagram">𝕀</a>
+        <a href="#" class="social-link" aria-label="Facebook">𝔽</a>
+        <a href="#" class="social-link" aria-label="Pinterest">𝕻</a>
+        <a href="#" class="social-link" aria-label="TikTok">𝕿</a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>Explore</h4>
+      <ul>
+        <li><a href="#rooms">Rooms &amp; Suites</a></li>
+        <li><a href="#gallery">Gallery</a></li>
+        <li><a href="#amenities">Experiences</a></li>
+        <li><a href="#booking">Reservations</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>At the Villa</h4>
+      <ul>
+        <li><a href="#">Osteria Rossini</a></li>
+        <li><a href="#">La Terme Spa</a></li>
+        <li><a href="#">Weddings &amp; Events</a></li>
+        <li><a href="#">Corporate Retreats</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Contact</h4>
+      <ul>
+        <li><a href="tel:+390577123456">+39 0577 123 456</a></li>
+        <li><a href="mailto:reservations@villarossini.it">reservations@villarossini.it</a></li>
+        <li><a href="#">Via della Vigna 12</a></li>
+        <li><a href="#">Montalcino, Siena 53024</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2024 Villa Rossini. All rights reserved.</span>
+    <span>Privacy Policy · Terms &amp; Conditions · Cookie Policy</span>
+  </div>
+</footer>
+
+<!-- ══════════════════ WHATSAPP ══════════════════ -->
+<a href="https://wa.me/390577123456?text=Hello%2C%20I%27d%20like%20to%20enquire%20about%20a%20reservation%20at%20Villa%20Rossini."
+   class="whatsapp-btn" target="_blank" rel="noopener" aria-label="Chat on WhatsApp">
+  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+  </svg>
+  <span class="whatsapp-tooltip">Chat with us</span>
+</a>
+
+<!-- ══════════════════ SCRIPTS ══════════════════ -->
+<script>
+// ── NAV SCROLL ────────────────────────────────────────────
+const nav = document.getElementById('mainNav');
+window.addEventListener('scroll', () => {
+  nav.classList.toggle('scrolled', window.scrollY > 60);
+});
+
+// ── HAMBURGER ─────────────────────────────────────────────
+const hamburger  = document.getElementById('hamburger');
+const mobileMenu = document.getElementById('mobileMenu');
+hamburger.addEventListener('click', () => {
+  hamburger.classList.toggle('open');
+  mobileMenu.classList.toggle('open');
+  document.body.style.overflow = mobileMenu.classList.contains('open') ? 'hidden' : '';
+});
+function closeMobile() {
+  hamburger.classList.remove('open');
+  mobileMenu.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// ── FADE IN ON SCROLL ─────────────────────────────────────
+const fadeEls = document.querySelectorAll('.fade-in');
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); } });
+}, { threshold: 0.12 });
+fadeEls.forEach(el => io.observe(el));
+
+// ── COUNTER ANIMATION ─────────────────────────────────────
+const counters = document.querySelectorAll('.stat-num[data-target]');
+const counterIO = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (!e.isIntersecting) return;
+    const el  = e.target;
+    const end = parseInt(el.dataset.target);
+    let cur = 0;
+    const step = Math.ceil(end / 60);
+    const t = setInterval(() => {
+      cur = Math.min(cur + step, end);
+      el.textContent = cur;
+      if (cur >= end) clearInterval(t);
+    }, 25);
+    counterIO.unobserve(el);
+  });
+}, { threshold: 0.5 });
+counters.forEach(el => counterIO.observe(el));
+
+// ── GALLERY SLIDER ────────────────────────────────────────
+(function() {
+  const track   = document.getElementById('sliderTrack');
+  const slides  = track.querySelectorAll('.slide');
+  const dotsWrap = document.getElementById('sliderDots');
+  const total   = slides.length;
+  let current = 0;
+  let slideW  = 0;
+  let gap     = 16;
+  let visible = 3;
+  let autoTimer;
+
+  function calcDimensions() {
+    const ww = window.innerWidth;
+    visible  = ww < 640 ? 1 : ww < 960 ? 2 : 3;
+    const containerW = track.parentElement.offsetWidth;
+    slideW = (containerW - gap * (visible - 1)) / visible;
+    slides.forEach(s => { s.style.flex = `0 0 ${slideW}px`; });
+  }
+
+  function buildDots() {
+    dotsWrap.innerHTML = '';
+    const dotCount = total - visible + 1;
+    for (let i = 0; i <= dotCount; i++) {
+      const d = document.createElement('div');
+      d.className = 'slider-dot' + (i === 0 ? ' active' : '');
+      d.addEventListener('click', () => goTo(i));
+      dotsWrap.appendChild(d);
+    }
+  }
+
+  function updateDots() {
+    dotsWrap.querySelectorAll('.slider-dot').forEach((d, i) => {
+      d.classList.toggle('active', i === current);
+    });
+  }
+
+  function goTo(n) {
+    const max = total - visible;
+    current = Math.max(0, Math.min(n, max));
+    track.style.transform = `translateX(-${current * (slideW + gap)}px)`;
+    updateDots();
+  }
+
+  function next() { goTo(current + 1 < total - visible + 1 ? current + 1 : 0); }
+  function prev() { goTo(current - 1 >= 0 ? current - 1 : total - visible); }
+
+  function startAuto() {
+    stopAuto();
+    autoTimer = setInterval(next, 4000);
+  }
+  function stopAuto() { clearInterval(autoTimer); }
+
+  document.getElementById('sliderNext').addEventListener('click', () => { stopAuto(); next(); startAuto(); });
+  document.getElementById('sliderPrev').addEventListener('click', () => { stopAuto(); prev(); startAuto(); });
+  track.addEventListener('mouseenter', stopAuto);
+  track.addEventListener('mouseleave', startAuto);
+
+  // Touch swipe
+  let touchStartX = 0;
+  track.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, { passive: true });
+  track.addEventListener('touchend',   e => {
+    const dx = e.changedTouches[0].screenX - touchStartX;
+    if (Math.abs(dx) > 50) { stopAuto(); dx < 0 ? next() : prev(); startAuto(); }
+  });
+
+  function init() {
+    calcDimensions();
+    buildDots();
+    goTo(0);
+    startAuto();
+  }
+  window.addEventListener('resize', () => { calcDimensions(); buildDots(); goTo(0); });
+  init();
+})();
+
+// ── TESTIMONIAL SLIDER ────────────────────────────────────
+(function() {
+  const testimonials = document.querySelectorAll('.testimonial');
+  const nav = document.getElementById('testimonialNav');
+  let cur = 0, timer;
+
+  testimonials.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 't-dot' + (i === 0 ? ' active' : '');
+    d.addEventListener('click', () => { clearInterval(timer); goTo(i); startAuto(); });
+    nav.appendChild(d);
+  });
+
+  function goTo(n) {
+    testimonials[cur].classList.remove('active');
+    nav.querySelectorAll('.t-dot')[cur].classList.remove('active');
+    cur = (n + testimonials.length) % testimonials.length;
+    testimonials[cur].classList.add('active');
+    nav.querySelectorAll('.t-dot')[cur].classList.add('active');
+  }
+  function startAuto() { timer = setInterval(() => goTo(cur + 1), 5000); }
+  startAuto();
+})();
+
+// ── SET MIN DATE FOR BOOKING ───────────────────────────────
+(function() {
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('checkIn').min  = today;
+  document.getElementById('checkOut').min = today;
+  document.getElementById('checkIn').addEventListener('change', function() {
+    document.getElementById('checkOut').min = this.value;
+  });
+})();
+
+// ── BOOKING FORM SUBMIT ───────────────────────────────────
+document.getElementById('bookingForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const msg    = document.getElementById('formMsg');
+  const btn    = document.getElementById('submitBtn');
+  msg.className = 'form-msg'; msg.style.display = 'none'; msg.textContent = '';
+
+  const firstName = document.getElementById('firstName').value.trim();
+  const lastName  = document.getElementById('lastName').value.trim();
+  const email     = document.getElementById('email').value.trim();
+  const checkIn   = document.getElementById('checkIn').value;
+  const checkOut  = document.getElementById('checkOut').value;
+  const roomType  = document.getElementById('roomType').value;
+
+  if (!firstName || !lastName || !email || !checkIn || !checkOut || !roomType) {
+    msg.textContent = 'Please complete all required fields.';
+    msg.className = 'form-msg error show'; return;
+  }
+  if (new Date(checkOut) <= new Date(checkIn)) {
+    msg.textContent = 'Check-out must be after check-in.';
+    msg.className = 'form-msg error show'; return;
+  }
+
+  btn.textContent = 'Booking...'; btn.disabled = true;
+
+  const booking = {
+    firstName, lastName,
+    email,
+    phone:    document.getElementById('phone').value.trim(),
+    checkIn, checkOut,
+    roomType,
+    guests:   document.getElementById('guests').value,
+    requests: document.getElementById('requests').value.trim(),
+    status:   'New',
+    submitted: window._firebaseReady ? window._serverTimestamp() : new Date().toISOString()
+  };
+
+  try {
+    if (window._firebaseReady && window._db) {
+      await window._addDoc(window._collection(window._db, 'bookings'), booking);
+      msg.textContent = 'Thank you for your reservation. Your booking is confirmed.';
+      msg.className = 'form-msg success show';
+      e.target.reset();
+    } else {
+      // Firebase not configured — demo mode
+      await new Promise(r => setTimeout(r, 900));
+      msg.textContent = 'Thank you for your reservation. Your booking is confirmed.';
+      msg.className = 'form-msg success show';
+      e.target.reset();
+    }
+  } catch (err) {
+    console.error(err);
+    msg.textContent = 'Something went wrong. Please try again or call us directly.';
+    msg.className = 'form-msg error show';
+  }
+  btn.textContent = 'Book Now'; btn.disabled = false;
+});
+
+// ── ADMIN DASHBOARD ───────────────────────────────────────
+const ADMIN_USER = 'admin';
+const ADMIN_PASS = 'rossini2024'; // Change this!
+
+const adminToggleBtn = document.getElementById('adminToggleBtn');
+const adminPanel     = document.getElementById('adminPanel');
+const adminLoginDiv  = document.getElementById('adminLogin');
+const adminBookings  = document.getElementById('adminBookings');
+const loginError     = document.getElementById('loginError');
+let adminLoggedIn    = false;
+
+adminToggleBtn.addEventListener('click', () => {
+  adminPanel.classList.toggle('open');
+  adminToggleBtn.textContent = adminPanel.classList.contains('open') ? 'Hide Dashboard' : 'Access Dashboard';
+});
+
+document.getElementById('adminLoginBtn').addEventListener('click', () => {
+  const u = document.getElementById('adminUser').value;
+  const p = document.getElementById('adminPass').value;
+  if (u === ADMIN_USER && p === ADMIN_PASS) {
+    loginError.textContent = '';
+    adminLoginDiv.style.display  = 'none';
+    adminBookings.style.display  = 'block';
+    adminLoggedIn = true;
+    loadBookings();
+  } else {
+    loginError.textContent = 'Invalid credentials. Please try again.';
+  }
+});
+
+document.getElementById('adminRefreshBtn').addEventListener('click', loadBookings);
+
+async function loadBookings() {
+  const tbody      = document.getElementById('bookingsTbody');
+  const countEl    = document.getElementById('bookingsCount');
+  const noBookings = document.getElementById('noBookings');
+  tbody.innerHTML  = '<tr><td colspan="11" style="text-align:center;padding:2rem;opacity:0.4;font-size:0.72rem;letter-spacing:0.1em">Loading…</td></tr>';
+
+  if (!window._firebaseReady || !window._db) {
+    tbody.innerHTML = '';
+    noBookings.style.display = 'block';
+    noBookings.textContent   = 'Firebase not configured — connect your project to view bookings.';
+    countEl.textContent = '';
+    return;
+  }
+
+  try {
+    const q    = window._query(window._collection(window._db, 'bookings'), window._orderBy('submitted', 'desc'));
+    const snap = await window._getDocs(q);
+    tbody.innerHTML = '';
+
+    if (snap.empty) {
+      noBookings.style.display = 'block';
+      countEl.textContent = '';
+    } else {
+      noBookings.style.display = 'none';
+      countEl.textContent = `${snap.size} reservation${snap.size !== 1 ? 's' : ''} on record`;
+      let idx = 1;
+      snap.forEach(doc => {
+        const d   = doc.data();
+        const row = document.createElement('tr');
+        const ts  = d.submitted?.toDate ? d.submitted.toDate().toLocaleString() : (d.submitted || '—');
+        row.innerHTML = `
+          <td>${idx++}</td>
+          <td>${esc(d.firstName)} ${esc(d.lastName)}</td>
+          <td>${esc(d.email)}</td>
+          <td>${esc(d.phone || '—')}</td>
+          <td>${esc(d.checkIn)}</td>
+          <td>${esc(d.checkOut)}</td>
+          <td>${esc(d.roomType)}</td>
+          <td>${esc(d.guests)}</td>
+          <td>${esc(d.requests || '—')}</td>
+          <td><span class="status-badge status-new">${esc(d.status || 'New')}</span></td>
+          <td>${ts}</td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+  } catch (err) {
+    console.error(err);
+    tbody.innerHTML = `<tr><td colspan="11" style="color:var(--terracotta);padding:1.5rem;font-size:0.72rem">Error loading bookings: ${err.message}</td></tr>`;
+  }
+}
+
+function esc(str) {
+  return String(str ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+</script>
+</body>
+</html>
