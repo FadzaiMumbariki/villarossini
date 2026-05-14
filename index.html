@@ -127,6 +127,16 @@ ul { list-style: none; }
   transition: background 0.3s, color 0.3s;
 }
 .nav-book-btn:hover { background: var(--gold); color: var(--espresso); }
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+button.nav-book-btn {
+  background: transparent;
+  font-family: var(--ff-body);
+  cursor: pointer;
+}
 
 /* Hamburger */
 .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 4px; }
@@ -142,6 +152,12 @@ ul { list-style: none; }
 }
 .mobile-menu.open { display: flex; }
 .mobile-menu a { font-family: var(--ff-display); font-size: 2rem; font-weight: 300; letter-spacing: 0.08em; }
+.mobile-menu-admin {
+  font-family: var(--ff-display); font-size: 2rem; font-weight: 300; letter-spacing: 0.08em;
+  color: var(--cream); opacity: 0.85;
+  background: none; border: none; cursor: pointer;
+}
+.mobile-menu-admin:hover { color: var(--gold); opacity: 1; }
 
 /* ═══════════════════════════════════════════════════════════
    HERO
@@ -156,7 +172,7 @@ ul { list-style: none; }
   position: absolute; inset: 0;
   background:
     linear-gradient(160deg, rgba(26,18,9,0.72) 0%, rgba(26,18,9,0.35) 50%, rgba(26,18,9,0.75) 100%),
-    url('https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1800&q=80') center/cover no-repeat;
+    url('images/lnfinity%20pool%20sunset.jpeg') center/cover no-repeat;
   transform: scale(1.05);
   animation: heroZoom 18s ease-in-out infinite alternate;
 }
@@ -531,6 +547,17 @@ select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns
   margin-top: 0.5rem;
 }
 .btn-submit:hover { background: var(--gold); color: var(--espresso); border-color: var(--gold); }
+.book-now-btn {
+  background: #141414;
+  color: #ffffff;
+  border: 1px solid #141414;
+  border-radius: 0;
+}
+.book-now-btn:hover {
+  background: #0c0c0c;
+  color: #ffffff;
+  border-color: #0c0c0c;
+}
 .form-msg {
   display: none; margin-top: 1rem; padding: 0.9rem 1.2rem;
   font-size: 0.72rem; letter-spacing: 0.08em; text-align: center;
@@ -540,27 +567,48 @@ select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns
 .form-msg.show { display: block; }
 
 /* ═══════════════════════════════════════════════════════════
-   ADMIN DASHBOARD
+   ADMIN DASHBOARD (MODAL)
 ═══════════════════════════════════════════════════════════ */
 .admin-section {
-  background: var(--espresso);
-  border-top: 1px solid var(--glass-border);
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: 
+    linear-gradient(160deg, rgba(26,18,9,0.95) 0%, rgba(26,18,9,0.85) 50%, rgba(26,18,9,0.95) 100%),
+    url('images/lnfinity%20pool%20sunset.jpeg') center/cover no-repeat;
+  backdrop-filter: blur(8px);
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  overflow-y: auto;
+}
+.admin-section.open {
+  display: flex;
+}
+.admin-close-btn {
+  position: absolute;
+  top: 2rem;
+  right: 2rem;
+  background: transparent;
+  border: none;
+  color: var(--gold);
+  font-size: 2rem;
+  cursor: pointer;
+  z-index: 1001;
+}
+.admin-container {
+  width: 100%;
+  max-width: 1000px;
+  margin: auto;
 }
 .admin-header { text-align: center; margin-bottom: 2.5rem; }
-.admin-toggle-btn {
-  display: block; margin: 0 auto 2.5rem;
-  padding: 0.8rem 2.5rem;
-  border: 1px solid var(--glass-border); background: transparent;
-  color: var(--cream); font-family: var(--ff-body);
-  font-size: 0.65rem; letter-spacing: 0.25em; text-transform: uppercase;
-  cursor: pointer; transition: border-color 0.3s, color 0.3s;
-}
-.admin-toggle-btn:hover { border-color: var(--gold); color: var(--gold); }
-.admin-panel { display: none; }
-.admin-panel.open { display: block; }
+.admin-panel { width: 100%; }
 .admin-login {
   max-width: 380px; margin: 0 auto; padding: 2.5rem;
   border: 1px solid var(--glass-border);
+  background: var(--espresso);
 }
 .admin-login h3 { font-family: var(--ff-display); font-size: 1.5rem; font-weight: 300; margin-bottom: 1.5rem; text-align: center; }
 .admin-login input {
@@ -702,7 +750,7 @@ footer {
   section { padding: 5rem 1.5rem; }
   .nav { padding: 1.2rem 1.5rem; }
   .nav.scrolled { padding: 0.85rem 1.5rem; }
-  .nav-links, .nav-book-btn { display: none; }
+  .nav-links, .nav-actions { display: none; }
   .hamburger { display: flex; }
   .about-strip { grid-template-columns: 1fr; }
   .about-image { height: 340px; }
@@ -734,7 +782,10 @@ footer {
     <li><a href="#amenities">Amenities</a></li>
     <li><a href="#booking">Reservations</a></li>
   </ul>
-  <a href="#booking" class="nav-book-btn">Book Now</a>
+  <div class="nav-actions">
+    <a href="#booking" class="nav-book-btn">Book Now</a>
+    <button type="button" class="nav-book-btn" id="adminToggleBtn" aria-expanded="false" aria-controls="adminPanel">Admin</button>
+  </div>
   <div class="hamburger" id="hamburger">
     <span></span><span></span><span></span>
   </div>
@@ -747,6 +798,7 @@ footer {
   <a href="#amenities"  onclick="closeMobile()">Amenities</a>
   <a href="#booking"    onclick="closeMobile()">Reservations</a>
   <a href="#booking"    onclick="closeMobile()" style="color:var(--gold)">Book Now</a>
+  <button type="button" class="mobile-menu-admin" id="adminToggleBtnMobile" aria-expanded="false">Admin</button>
 </div>
 
 <!-- ══════════════════ HERO ══════════════════ -->
@@ -768,8 +820,7 @@ footer {
 <!-- ══════════════════ ABOUT STRIP ══════════════════ -->
 <div class="about-strip">
   <div class="about-image fade-in">
-    <img src="images/download (10).jpeg" alt="Hotel exterior">
-    <div class="about-image-caption">Exterior · Villa Rossini</div>
+    <img src="images/Gardino%20walled%20gardens.jpeg?v=20260516" alt="Walled gardens at Villa Rossini">
   </div>
   <div class="about-text fade-in">
     <span class="section-label">Our Story</span>
@@ -803,10 +854,10 @@ footer {
   <div class="rooms-grid fade-in">
 
     <div class="room-card">
-      <img src="images/Transform Your Bedroom into a Refined Retreat with Timeless Modern Design.jpeg" alt="Deluxe Room" loading="lazy">
+      <img src="" alt="" loading="lazy" data-room-img="garden">
       <div class="room-overlay">
         <div class="room-tag">Deluxe</div>
-        <div class="room-name">Garden Room</div>
+        <div class="room-name">Garden room</div>
         <div class="room-price">From €320 / night</div>
         <div class="room-desc">Warm stone walls and hand-painted frescoes overlook our private rose garden. King bed, marble en-suite, organic bath amenities.</div>
         <a href="#booking" class="room-btn">Reserve</a>
@@ -814,10 +865,10 @@ footer {
     </div>
 
     <div class="room-card">
-      <img src="images/download (2).jpeg" alt="Junior Suite" loading="lazy">
+      <img src="" alt="" loading="lazy" data-room-img="vineyard">
       <div class="room-overlay">
         <div class="room-tag">Junior Suite</div>
-        <div class="room-name">Vineyard Suite</div>
+        <div class="room-name">Vineyard room</div>
         <div class="room-price">From €520 / night</div>
         <div class="room-desc">Panoramic vineyard views from your private loggia. Freestanding copper bathtub, bespoke Florentine furnishings, butler service.</div>
         <a href="#booking" class="room-btn">Reserve</a>
@@ -825,10 +876,10 @@ footer {
     </div>
 
     <div class="room-card">
-      <img src="images/Chambre bleu nuit _ la couleur idéale et tendance - DTI.jpeg" alt="Grand Suite" loading="lazy">
+      <img src="" alt="" loading="lazy" data-room-img="rossini">
       <div class="room-overlay">
         <div class="room-tag">Grand Suite</div>
-        <div class="room-name">Rossini Suite</div>
+        <div class="room-name">Rossini suite</div>
         <div class="room-price">From €980 / night</div>
         <div class="room-desc">The Count's original chambers — 18th-century frescoes, a private heated pool, dual living rooms and your own personal sommelier.</div>
         <a href="#booking" class="room-btn">Reserve</a>
@@ -836,10 +887,10 @@ footer {
     </div>
 
     <div class="room-card">
-      <img src="images/download (14).jpeg" alt="Superior Room" loading="lazy">
+      <img src="" alt="" loading="lazy" data-room-img="cypress">
       <div class="room-overlay">
         <div class="room-tag">Superior</div>
-        <div class="room-name">Cypress Room</div>
+        <div class="room-name">Cypress room</div>
         <div class="room-price">From €420 / night</div>
         <div class="room-desc">Named for the ancient cypress avenue outside, featuring a private terrace, hand-laid terracotta floors and a rainfall walk-in shower.</div>
         <a href="#booking" class="room-btn">Reserve</a>
@@ -847,10 +898,10 @@ footer {
     </div>
 
     <div class="room-card">
-      <img src="images/download (3).jpeg" alt="Tower Suite" loading="lazy">
+      <img src="" alt="" loading="lazy" data-room-img="torre">
       <div class="room-overlay">
         <div class="room-tag">Tower Suite</div>
-        <div class="room-name">Torre Suite</div>
+        <div class="room-name">Torre suite</div>
         <div class="room-price">From €1,200 / night</div>
         <div class="room-desc">360° views from the 14th-century tower. Two floors of splendour with a private rooftop observatory for stargazing over Tuscany.</div>
         <a href="#booking" class="room-btn">Reserve</a>
@@ -858,10 +909,10 @@ footer {
     </div>
 
     <div class="room-card">
-      <img src="images/download (15).jpeg" alt="Cottage" loading="lazy">
+      <img src="" alt="" loading="lazy" data-room-img="casale">
       <div class="room-overlay">
         <div class="room-tag">Private Villa</div>
-        <div class="room-name">Il Casale</div>
+        <div class="room-name">ll casale</div>
         <div class="room-price">From €2,400 / night</div>
         <div class="room-desc">A detached stone cottage with three bedrooms, a private chef's kitchen, olive grove and infinity pool — total seclusion on 4 acres.</div>
         <a href="#booking" class="room-btn">Reserve</a>
@@ -880,32 +931,32 @@ footer {
   <div class="slider-wrap">
     <div class="slider-track" id="sliderTrack">
       <div class="slide">
-        <img src="images/Dream Backyard with Infinity Pool & Fire Pit (1).jpeg" alt="Pool" loading="lazy">
-        <div class="slide-caption">Infinity Pool · Sunset</div>
+        <img src="images/lnfinity%20pool%20sunset.jpeg?v=20260516" alt="lnfinity pool sunset" loading="lazy">
+        <div class="slide-caption">lnfinity pool sunset</div>
       </div>
       <div class="slide">
-        <img src="images/download (10).jpeg" alt="Restaurant" loading="lazy">
-        <div class="slide-caption">Osteria Rossini · Fine Dining</div>
+        <img src="images/Osteria%20rossini%20fine%20dinning.jpeg?v=20260516" alt="Osteria rossini fine dinning" loading="lazy">
+        <div class="slide-caption">Osteria rossini fine dinning</div>
       </div>
       <div class="slide">
-        <img src="images/Chambre bleu nuit _ la couleur idéale et tendance - DTI.jpeg" alt="Spa" loading="lazy">
-        <div class="slide-caption">La Terme · Luxury Spa</div>
+        <img src="images/La%20terme%20luxury%20spa.jpeg?v=20260516" alt="La terme luxury spa" loading="lazy">
+        <div class="slide-caption">La terme luxury spa</div>
       </div>
       <div class="slide">
-        <img src="images/download (14).jpeg" alt="Wine Cellar" loading="lazy">
-        <div class="slide-caption">Cantina · Wine Cellar</div>
+        <img src="images/Cantina%20wine%20%20cellar.jpeg?v=20260516" alt="Cantina wine cellar" loading="lazy">
+        <div class="slide-caption">Cantina wine cellar</div>
       </div>
       <div class="slide">
-        <img src="images/Transform Your Bedroom into a Refined Retreat with Timeless Modern Design.jpeg" alt="Garden" loading="lazy">
-        <div class="slide-caption">Giardino · Walled Gardens</div>
+        <img src="images/Gardino%20walled%20gardens.jpeg?v=20260516" alt="Gardino walled gardens" loading="lazy">
+        <div class="slide-caption">Gardino walled gardens</div>
       </div>
       <div class="slide">
-        <img src="images/download (3).jpeg" alt="Library" loading="lazy">
-        <div class="slide-caption">Biblioteca · Private Library</div>
+        <img src="images/Bibliotica%20private%20library.jpeg?v=20260516" alt="Bibliotica private library" loading="lazy">
+        <div class="slide-caption">Bibliotica private library</div>
       </div>
       <div class="slide">
-        <img src="images/Pin by The Count Of Monte Cristo on Equestrian _ Dressage _ Show Jumping _ Polo _ Horses, Horse ride.jpeg" alt="Breakfast" loading="lazy">
-        <div class="slide-caption">Colazione · Morning Terrace</div>
+        <img src="images/fine%20dining.jpeg?v=20260516" alt="fine dining" loading="lazy">
+        <div class="slide-caption">fine dining</div>
       </div>
     </div>
   </div>
@@ -924,43 +975,43 @@ footer {
   </div>
   <div class="amenities-grid fade-in">
     <div class="amenity-card">
-      <img class="amenity-image" src="images/download (14).jpeg" alt="Wine Cellar" loading="lazy">
-      <div class="amenity-name">Wine Cellar</div>
+      <img class="amenity-image" src="images/wine%20cellar.jpeg?v=20260516" alt="wine cellar" loading="lazy">
+      <div class="amenity-name">wine cellar</div>
       <div class="amenity-desc">Curated tastings in our 15th-century cellar with 4,000 bottles from the finest Italian estates.</div>
     </div>
     <div class="amenity-card">
-      <img class="amenity-image" src="images/Chambre bleu nuit _ la couleur idéale et tendance - DTI.jpeg" alt="Organic Spa" loading="lazy">
-      <div class="amenity-name">Organic Spa</div>
+      <img class="amenity-image" src="images/organic%20spa.jpeg?v=20260516" alt="organic spa" loading="lazy">
+      <div class="amenity-name">organic spa</div>
       <div class="amenity-desc">Traditional thermae rituals using locally sourced olive oil, volcanic clay and wildflower extracts.</div>
     </div>
     <div class="amenity-card">
-      <img class="amenity-image" src="images/download (10).jpeg" alt="Fine Dining" loading="lazy">
-      <div class="amenity-name">Fine Dining</div>
+      <img class="amenity-image" src="images/Osteria%20rossini%20fine%20dinning.jpeg?v=20260516" alt="Osteria rossini fine dinning" loading="lazy">
+      <div class="amenity-name">Osteria rossini fine dinning</div>
       <div class="amenity-desc">One Michelin-star Osteria Rossini — seasonal Tuscan cuisine by Executive Chef Marco Ferri.</div>
     </div>
     <div class="amenity-card">
-      <img class="amenity-image" src="images/download (3).jpeg" alt="Cycling Tours" loading="lazy">
-      <div class="amenity-name">Cycling Tours</div>
+      <img class="amenity-image" src="images/cycling%20tours.jpeg?v=20260516" alt="cycling tours" loading="lazy">
+      <div class="amenity-name">cycling tours</div>
       <div class="amenity-desc">Guided e-bike journeys through cypress-lined lanes and hilltop villages with picnic baskets.</div>
     </div>
     <div class="amenity-card">
-      <img class="amenity-image" src="images/download (15).jpeg" alt="Art Workshops" loading="lazy">
-      <div class="amenity-name">Art Workshops</div>
+      <img class="amenity-image" src="images/art%20workshop.jpeg?v=20260516" alt="art workshop" loading="lazy">
+      <div class="amenity-name">art workshop</div>
       <div class="amenity-desc">Fresco painting and ceramics in our garden atelier with Florentine master artisans.</div>
     </div>
     <div class="amenity-card">
-      <img class="amenity-image" src="images/Dream Backyard with Infinity Pool & Fire Pit (1).jpeg" alt="Infinity Pool" loading="lazy">
-      <div class="amenity-name">Infinity Pool</div>
+      <img class="amenity-image" src="images/infinity%20pool.jpeg?v=20260516" alt="infinity pool" loading="lazy">
+      <div class="amenity-name">infinity pool</div>
       <div class="amenity-desc">A heated 25m infinity pool overlooking the Val d'Orcia, open year-round with poolside service.</div>
     </div>
     <div class="amenity-card">
-      <img class="amenity-image" src="images/Pin by The Count Of Monte Cristo on Equestrian _ Dressage _ Show Jumping _ Polo _ Horses, Horse ride.jpeg" alt="Horse Riding" loading="lazy">
-      <div class="amenity-name">Horse Riding</div>
+      <img class="amenity-image" src="images/horse%20riding.jpeg?v=20260516" alt="horse riding" loading="lazy">
+      <div class="amenity-name">horse riding</div>
       <div class="amenity-desc">Morning rides through our private olive groves and truffle forests with expert equestrian guides.</div>
     </div>
     <div class="amenity-card">
-      <img class="amenity-image" src="images/download (10).jpeg" alt="Helicopter Transfer" loading="lazy">
-      <div class="amenity-name">Helicopter Transfer</div>
+      <img class="amenity-image" src="images/helicopter%20transfer.jpeg?v=20260516" alt="helicopter transfer" loading="lazy">
+      <div class="amenity-name">helicopter transfer</div>
       <div class="amenity-desc">Private helicopter arrivals from Florence, Pisa and Rome airports to our landscaped helipad.</div>
     </div>
   </div>
@@ -1038,7 +1089,7 @@ footer {
           </div>
           <div class="form-group">
             <label for="phone">Phone Number</label>
-            <input type="tel" id="phone" placeholder="+39 000 000 0000">
+            <input type="tel" id="phone" placeholder="+39 000 000 0000" required>
           </div>
         </div>
         <div class="form-row">
@@ -1056,22 +1107,18 @@ footer {
             <label for="roomType">Room Type</label>
             <select id="roomType" required>
               <option value="">Select a Room</option>
-              <option>Garden Room — €320/night</option>
-              <option>Vineyard Suite — €520/night</option>
-              <option>Rossini Suite — €980/night</option>
-              <option>Cypress Room — €420/night</option>
-              <option>Torre Suite — €1,200/night</option>
-              <option>Il Casale (Private Villa) — €2,400/night</option>
+              <option value="Suite">Suite</option>
+              <option value="Deluxe">Deluxe</option>
             </select>
           </div>
           <div class="form-group">
             <label for="guests">Number of Guests</label>
-            <select id="guests">
-              <option>1 Guest</option>
-              <option selected>2 Guests</option>
-              <option>3 Guests</option>
-              <option>4 Guests</option>
-              <option>5+ Guests</option>
+            <select id="guests" required>
+              <option value="">Select Guests</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
             </select>
           </div>
         </div>
@@ -1081,7 +1128,7 @@ footer {
             <textarea id="requests" placeholder="Dietary requirements, room preferences, special occasions…"></textarea>
           </div>
         </div>
-        <button type="submit" class="btn-submit" id="submitBtn">Book Now</button>
+        <button type="submit" class="btn-submit book-now-btn" id="submitBtn">BOOK NOW</button>
         <div class="form-msg" id="formMsg"></div>
       </form>
     </div>
@@ -1090,51 +1137,52 @@ footer {
 
 <!-- ══════════════════ ADMIN DASHBOARD ══════════════════ -->
 <section class="admin-section" id="admin">
-  <div class="admin-header fade-in">
-    <span class="section-label">Staff Portal</span>
-    <h2 class="section-title">Admin <em>Dashboard</em></h2>
-  </div>
-  <button class="admin-toggle-btn" id="adminToggleBtn">Access Dashboard</button>
-  <div class="admin-panel" id="adminPanel">
-
-    <!-- Login -->
-    <div class="admin-login" id="adminLogin">
-      <h3>Staff Login</h3>
-      <label for="adminUser">Username</label>
-      <input type="text" id="adminUser" placeholder="admin">
-      <label for="adminPass">Password</label>
-      <input type="password" id="adminPass" placeholder="••••••••">
-      <button class="btn-submit" id="adminLoginBtn" style="margin-top:1rem">Sign In</button>
-      <p class="login-error" id="loginError"></p>
+  <button class="admin-close-btn" id="adminCloseBtn">&times;</button>
+  <div class="admin-container">
+    <div class="admin-header">
+      <span class="section-label">Staff Portal</span>
+      <h2 class="section-title">Admin <em>Dashboard</em></h2>
     </div>
+    <div class="admin-panel" id="adminPanel">
 
-    <!-- Bookings Table (hidden until login) -->
-    <div id="adminBookings" style="display:none">
-      <div class="bookings-count" id="bookingsCount"></div>
-      <div class="bookings-table-wrap">
-        <table class="bookings-table" id="bookingsTable">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Phone</th>
-              <th>Check-In</th>
-              <th>Check-Out</th>
-              <th>Room</th>
-              <th>Guests</th>
-              <th>Requests</th>
-              <th>Status</th>
-              <th>Submitted</th>
-            </tr>
-          </thead>
-          <tbody id="bookingsTbody"></tbody>
-        </table>
-        <div class="admin-no-bookings" id="noBookings" style="display:none">No reservations yet.</div>
+      <!-- Login -->
+      <div class="admin-login" id="adminLogin">
+        <h3>Staff Login</h3>
+        <label for="adminUser">Username</label>
+        <input type="text" id="adminUser" placeholder="admin">
+        <label for="adminPass">Password</label>
+        <input type="password" id="adminPass" placeholder="••••••••">
+        <button class="btn-submit" id="adminLoginBtn" style="margin-top:1rem">Sign In</button>
+        <p class="login-error" id="loginError"></p>
       </div>
-      <button class="admin-refresh-btn" id="adminRefreshBtn">↻ Refresh</button>
-    </div>
 
+      <!-- Bookings Table (hidden until login) -->
+      <div id="adminBookings" style="display:none">
+        <div class="bookings-count" id="bookingsCount"></div>
+        <div class="bookings-table-wrap">
+          <table class="bookings-table" id="bookingsTable">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Check-In</th>
+                <th>Check-Out</th>
+                <th>Room</th>
+                <th>Guests</th>
+                <th>Requests</th>
+                <th>Status</th>
+                <th>Submitted</th>
+              </tr>
+            </thead>
+            <tbody id="bookingsTbody"></tbody>
+          </table>
+          <div class="admin-no-bookings" id="noBookings" style="display:none">No reservations yet.</div>
+        </div>
+        <button class="admin-refresh-btn" id="adminRefreshBtn">↻ Refresh</button>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -1352,79 +1400,190 @@ counters.forEach(el => counterIO.observe(el));
   });
 })();
 
+// ── ROOM CARD IMAGES (edit ROOM_IMAGE_MAP to point each room at the correct JPEG) ──
+(function applyRoomCardImages() {
+  var v = '20260516';
+  function imgSrc(filename) {
+    return 'images/' + encodeURIComponent(filename) + '?v=' + v;
+  }
+  var ROOM_IMAGE_MAP = {
+    garden:   { file: 'Garden room.jpeg',    alt: 'Garden room' },
+    vineyard: { file: 'Vineyard room.jpeg', alt: 'Vineyard room' },
+    rossini:  { file: 'Rossini suite.jpeg', alt: 'Rossini suite' },
+    cypress:  { file: 'Cypress room.jpeg',  alt: 'Cypress room' },
+    torre:    { file: 'Torre suite.jpeg',   alt: 'Torre suite' },
+    casale:   { file: 'll casale.jpeg',     alt: 'll casale' }
+  };
+  document.querySelectorAll('[data-room-img]').forEach(function (img) {
+    var key = img.getAttribute('data-room-img');
+    var meta = ROOM_IMAGE_MAP[key];
+    if (!meta) return;
+    img.src = imgSrc(meta.file);
+    img.alt = meta.alt;
+  });
+})();
+
+let adminLoggedIn = false;
+
+// ── MOCK BOOKING DATABASE (localStorage) ─────────────────
+const MOCK_BOOKINGS_KEY = 'villa_rossini_mock_bookings';
+
+const MockBookingDB = {
+  _read() {
+    try {
+      const raw = localStorage.getItem(MOCK_BOOKINGS_KEY);
+      const parsed = raw ? JSON.parse(raw) : [];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  },
+  _write(rows) {
+    localStorage.setItem(MOCK_BOOKINGS_KEY, JSON.stringify(rows));
+  },
+  /** Simulates network latency; persists and returns a confirmation id. */
+  async insert(payload) {
+    await new Promise(function (resolve) { setTimeout(resolve, 400); });
+    const rows = this._read();
+    const id = 'VR-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2, 6).toUpperCase();
+    const record = {
+      id: id,
+      firstName: payload.firstName,
+      lastName: payload.lastName,
+      email: payload.email,
+      phone: payload.phone,
+      checkIn: payload.checkIn,
+      checkOut: payload.checkOut,
+      roomType: payload.roomType,
+      guests: payload.guests,
+      requests: payload.requests || '',
+      status: 'Confirmed',
+      submitted: new Date().toISOString()
+    };
+    rows.unshift(record);
+    this._write(rows);
+    return { id: id, record: record };
+  },
+  list() {
+    return this._read();
+  }
+};
+
+function setBookingFormMsg(type, message) {
+  const el = document.getElementById('formMsg');
+  el.textContent = message;
+  el.className = 'form-msg show ' + (type === 'success' ? 'success' : 'error');
+}
+
+function clearBookingFormMsg() {
+  const el = document.getElementById('formMsg');
+  el.textContent = '';
+  el.className = 'form-msg';
+}
+
 // ── BOOKING FORM SUBMIT ───────────────────────────────────
 document.getElementById('bookingForm').addEventListener('submit', async function(e) {
   e.preventDefault();
-  const msg    = document.getElementById('formMsg');
-  const btn    = document.getElementById('submitBtn');
-  msg.className = 'form-msg'; msg.style.display = 'none'; msg.textContent = '';
+
+  const form = e.target;
+  const submitBtn = document.getElementById('submitBtn');
 
   const firstName = document.getElementById('firstName').value.trim();
-  const lastName  = document.getElementById('lastName').value.trim();
-  const email     = document.getElementById('email').value.trim();
-  const checkIn   = document.getElementById('checkIn').value;
-  const checkOut  = document.getElementById('checkOut').value;
-  const roomType  = document.getElementById('roomType').value;
+  const lastName = document.getElementById('lastName').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const phone = document.getElementById('phone').value.trim();
+  const checkIn = document.getElementById('checkIn').value;
+  const checkOut = document.getElementById('checkOut').value;
+  const roomType = document.getElementById('roomType').value;
+  const guests = document.getElementById('guests').value;
+  const requests = document.getElementById('requests').value.trim();
 
-  if (!firstName || !lastName || !email || !checkIn || !checkOut || !roomType) {
-    msg.textContent = 'Please complete all required fields.';
-    msg.className = 'form-msg error show'; return;
+  clearBookingFormMsg();
+
+  if (!firstName || !lastName || !email || !phone || !checkIn || !checkOut || !roomType || !guests) {
+    setBookingFormMsg('error', 'Please fill in all required fields.');
+    return;
   }
+
   if (new Date(checkOut) <= new Date(checkIn)) {
-    msg.textContent = 'Check-out must be after check-in.';
-    msg.className = 'form-msg error show'; return;
+    setBookingFormMsg('error', 'Check-out must be after check-in.');
+    return;
   }
 
-  btn.textContent = 'Booking...'; btn.disabled = true;
-
-  const booking = {
-    firstName, lastName,
-    email,
-    phone:    document.getElementById('phone').value.trim(),
-    checkIn, checkOut,
-    roomType,
-    guests:   document.getElementById('guests').value,
-    requests: document.getElementById('requests').value.trim(),
-    status:   'New',
-    submitted: window._firebaseReady ? window._serverTimestamp() : new Date().toISOString()
+  const bookingPayload = {
+    firstName: firstName,
+    lastName: lastName,
+    email: email,
+    phone: phone,
+    checkIn: checkIn,
+    checkOut: checkOut,
+    roomType: roomType,
+    guests: guests,
+    requests: requests
   };
 
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'BOOKING...';
+
   try {
-    if (window._firebaseReady && window._db) {
-      await window._addDoc(window._collection(window._db, 'bookings'), booking);
-      msg.textContent = 'Thank you for your reservation. Your booking is confirmed.';
-      msg.className = 'form-msg success show';
-      e.target.reset();
-    } else {
-      // Firebase not configured — demo mode
-      await new Promise(r => setTimeout(r, 900));
-      msg.textContent = 'Thank you for your reservation. Your booking is confirmed.';
-      msg.className = 'form-msg success show';
-      e.target.reset();
-    }
+    const result = await MockBookingDB.insert(bookingPayload);
+    form.reset();
+    setBookingFormMsg(
+      'success',
+      'Reservation confirmed. Your reference is ' + result.id + '. We have received your details and will follow up by email.'
+    );
+    if (adminLoggedIn) loadBookings();
   } catch (err) {
     console.error(err);
-    msg.textContent = 'Something went wrong. Please try again or call us directly.';
-    msg.className = 'form-msg error show';
+    setBookingFormMsg('error', 'We could not complete the reservation. Please try again.');
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'BOOK NOW';
   }
-  btn.textContent = 'Book Now'; btn.disabled = false;
 });
 
-// ── ADMIN DASHBOARD ───────────────────────────────────────
+// -- ADMIN DASHBOARD -----------------------------------
 const ADMIN_USER = 'admin';
 const ADMIN_PASS = 'rossini2024'; // Change this!
 
 const adminToggleBtn = document.getElementById('adminToggleBtn');
-const adminPanel     = document.getElementById('adminPanel');
+const adminToggleBtnMobile = document.getElementById('adminToggleBtnMobile');
+const adminCloseBtn  = document.getElementById('adminCloseBtn');
+const adminSection   = document.getElementById('admin');
 const adminLoginDiv  = document.getElementById('adminLogin');
 const adminBookings  = document.getElementById('adminBookings');
 const loginError     = document.getElementById('loginError');
-let adminLoggedIn    = false;
 
-adminToggleBtn.addEventListener('click', () => {
-  adminPanel.classList.toggle('open');
-  adminToggleBtn.textContent = adminPanel.classList.contains('open') ? 'Hide Dashboard' : 'Access Dashboard';
-});
+function syncAdminToggleLabel() {
+  const open = adminSection.classList.contains('open');
+  const label = open ? 'Close' : 'Admin';
+  if (adminToggleBtn) {
+    adminToggleBtn.textContent = label;
+    adminToggleBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  }
+  if (adminToggleBtnMobile) {
+    adminToggleBtnMobile.textContent = label;
+    adminToggleBtnMobile.setAttribute('aria-expanded', open ? 'true' : 'false');
+  }
+}
+
+function toggleAdminPanel(fromMobile) {
+  adminSection.classList.toggle('open');
+  const isOpen = adminSection.classList.contains('open');
+  document.body.style.overflow = isOpen ? 'hidden' : '';
+  syncAdminToggleLabel();
+  if (fromMobile) closeMobile();
+}
+
+if (adminToggleBtn) {
+  adminToggleBtn.addEventListener('click', function () { toggleAdminPanel(false); });
+}
+if (adminToggleBtnMobile) {
+  adminToggleBtnMobile.addEventListener('click', function () { toggleAdminPanel(true); });
+}
+if (adminCloseBtn) {
+  adminCloseBtn.addEventListener('click', function () { toggleAdminPanel(false); });
+}
 
 document.getElementById('adminLoginBtn').addEventListener('click', () => {
   const u = document.getElementById('adminUser').value;
@@ -1448,11 +1607,38 @@ async function loadBookings() {
   const noBookings = document.getElementById('noBookings');
   tbody.innerHTML  = '<tr><td colspan="11" style="text-align:center;padding:2rem;opacity:0.4;font-size:0.72rem;letter-spacing:0.1em">Loading…</td></tr>';
 
-  if (!window._firebaseReady || !window._db) {
+  const useFirebase = window._firebaseReady && window._db;
+
+  if (!useFirebase) {
     tbody.innerHTML = '';
-    noBookings.style.display = 'block';
-    noBookings.textContent   = 'Firebase not configured — connect your project to view bookings.';
-    countEl.textContent = '';
+    const rows = MockBookingDB.list();
+    if (rows.length === 0) {
+      noBookings.style.display = 'block';
+      noBookings.textContent   = 'No reservations yet. Guest bookings from the form are stored in a local mock database (this browser only).';
+      countEl.textContent = '';
+      return;
+    }
+    noBookings.style.display = 'none';
+    countEl.textContent = rows.length + ' reservation' + (rows.length !== 1 ? 's' : '') + ' (mock database)';
+    let idx = 1;
+    rows.forEach(function (d) {
+      const ts = new Date(d.submitted).toLocaleString();
+      const row = document.createElement('tr');
+      row.innerHTML = `
+          <td>${idx++}</td>
+          <td>${esc(d.firstName)} ${esc(d.lastName)}</td>
+          <td>${esc(d.email)}</td>
+          <td>${esc(d.phone || '—')}</td>
+          <td>${esc(d.checkIn)}</td>
+          <td>${esc(d.checkOut)}</td>
+          <td>${esc(d.roomType)}</td>
+          <td>${esc(d.guests)}</td>
+          <td>${esc(d.requests || '—')}</td>
+          <td><span class="status-badge status-new">${esc(d.status || 'New')}</span></td>
+          <td>${esc(ts)}</td>
+        `;
+      tbody.appendChild(row);
+    });
     return;
   }
 
@@ -1483,14 +1669,14 @@ async function loadBookings() {
           <td>${esc(d.guests)}</td>
           <td>${esc(d.requests || '—')}</td>
           <td><span class="status-badge status-new">${esc(d.status || 'New')}</span></td>
-          <td>${ts}</td>
+          <td>${esc(ts)}</td>
         `;
         tbody.appendChild(row);
       });
     }
   } catch (err) {
     console.error(err);
-    tbody.innerHTML = `<tr><td colspan="11" style="color:var(--terracotta);padding:1.5rem;font-size:0.72rem">Error loading bookings: ${err.message}</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="11" style="color:var(--terracotta);padding:1.5rem;font-size:0.72rem">Error loading bookings: ${esc(err.message)}</td></tr>`;
   }
 }
 
